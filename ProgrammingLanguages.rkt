@@ -157,7 +157,14 @@
           (trueExp (eval-exp (cadr appExp) env))
           (falseExp(caddr appExp)))
     (if boolExp trueExp (eval-exp falseExp env)))))
-    
+
+(define eval-while-exp
+  (lambda (appExp env)
+    (let ((boolExp (eval-exp (car appExp) env)))
+      (if boolExp
+          (list (eval-exp (cadr appExp) env) (eval-while-exp appExp env))
+          #f))))
+
 (define eval-exp
   (lambda (lce env)
     (cond
@@ -181,6 +188,8 @@
           (eval-bool-arith-op-exp (cdr lce) env))
          ((eq? (list-ref (list-ref lce 1) 0) 'if-exp)
           (eval-if-exp (cddr lce) env))
+         ((eq? (list-ref (list-ref lce 1) 0) 'while-exp)
+          (eval-while-exp (cddr lce) env))
          ((eq? (list-ref (list-ref lce 1) 0) 'let-exp)
           (eval-exp (list-ref lce 3) (extend-env-4-let (cdr (list-ref lce 2)) env)))
          (else
@@ -201,7 +210,7 @@
 
 
 
-(define anExp '(let ((fact (lambda (x) (if (== x 1) 1 (* x (fact (- x 1))))))) (fact 7))) 
+(define anExp '(let ((fact (lambda (x) (if (== x 1) 1 (* x (fact (- x 1))))))) (fact 4))) 
 
 
 (run-program (parse-exp anExp))
